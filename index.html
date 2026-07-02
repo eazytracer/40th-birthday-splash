@@ -46,6 +46,19 @@
       letter-spacing: .03em; text-transform: uppercase; text-decoration: none;
       box-shadow: 0 12px 30px -8px rgba(216,69,47,.6);
     }
+    /* wider layout on desktop */
+    @media (min-width: 760px) {
+      .site { max-width: 820px; }
+      .rsvp-bar { max-width: 820px; }
+      .agenda {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 34px;
+        align-items: start;
+        padding: 0 26px;
+      }
+      .agenda > .day { padding-left: 0 !important; padding-right: 0 !important; }
+    }
   </style>
 </head>
 <body>
@@ -89,8 +102,10 @@
       <h2 style="font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 44px; line-height: .92; text-transform: uppercase; margin: 6px 0 0; color: #f3ead9;">Two epic nights</h2>
     </div>
 
+    <div class="agenda">
+
     <!-- FRIDAY -->
-    <div style="padding: 22px 26px 0;">
+    <div class="day" style="padding: 22px 26px 0;">
       <div style="display: flex; align-items: baseline; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid rgba(243,234,217,.12);">
         <span style="font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: #d8452f; text-transform: uppercase; letter-spacing: .03em;">Friday</span>
         <span style="font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .1em; color: #a3927a;">JUL 24</span>
@@ -125,7 +140,7 @@
     </div>
 
     <!-- SATURDAY -->
-    <div style="padding: 6px 26px 0;">
+    <div class="day" style="padding: 6px 26px 0;">
       <div style="display: flex; align-items: baseline; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid rgba(243,234,217,.12); flex-wrap: wrap;">
         <span style="font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: #3f7ca0; text-transform: uppercase; letter-spacing: .03em;">Saturday</span>
         <span style="font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .08em; color: #a3927a;">JUL 25 · THE B-SIDE, COUNCIL BLUFFS</span>
@@ -163,6 +178,8 @@
         </div>
       </div>
     </div>
+
+    </div><!-- /.agenda -->
 
     <!-- MENU -->
     <div style="margin: 20px 20px; padding: 26px 24px; background: linear-gradient(180deg, #1a130d, #130e0a); border: 1px solid rgba(242,181,68,.28); border-radius: 12px;">
