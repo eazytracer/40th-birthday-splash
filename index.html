@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eric's 40th Birthday Weekend · Jul 24–25</title>
-  <meta name="description" content="Eric's 40th birthday weekend — two nights of food, games, and live rock in Omaha & Council Bluffs, July 24–25.">
-  <meta property="og:title" content="Eric's 40th Birthday Weekend">
-  <meta property="og:description" content="Two nights. Free dinner. Loud live rock. July 24–25 · Omaha × Council Bluffs.">
+  <meta name="description" content="Eric's 40th — live rock, an open jam, and a late-night party at The B-Side, Council Bluffs. Saturday July 25. Game night Friday too.">
+  <meta property="og:title" content="Eric's 40th · Live Rock Party">
+  <meta property="og:description" content="Saturday July 25 — live bands, open jam, party 'til 2 AM at The B-Side. Council Bluffs × Omaha.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -50,14 +50,69 @@
     @media (min-width: 760px) {
       .site { max-width: 820px; }
       .rsvp-bar { max-width: 820px; }
-      .agenda {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0 34px;
-        align-items: start;
-        padding: 0 26px;
-      }
-      .agenda > .day { padding-left: 0 !important; padding-right: 0 !important; }
+    }
+    /* peek carousel — one slide centered, neighbors sliced on each side */
+    .carousel { position: relative; }
+    .carousel-track {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      padding: 0 11%;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .carousel-track::-webkit-scrollbar { display: none; }
+    .slide {
+      flex: 0 0 78%;
+      scroll-snap-align: center;
+    }
+    .slide img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+    }
+    .slide .cap {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+      color: #7d7059; margin-top: 6px; text-align: center;
+    }
+    .car-btn {
+      position: absolute; top: 100px; transform: translateY(-50%);
+      width: 34px; height: 34px; border-radius: 50%;
+      border: none; cursor: pointer;
+      background: rgba(16,12,10,.72); color: #f3ead9;
+      font-family: 'Barlow', sans-serif; font-size: 20px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px -4px rgba(0,0,0,.7);
+      z-index: 2;
+    }
+    .car-btn.prev { left: 4px; }
+    .car-btn.next { right: 4px; }
+    .car-btn .chev { position: relative; z-index: 1; }
+    /* countdown ring on the next arrow — its fill IS the 3s timer */
+    .car-btn.next .ring {
+      position: absolute; top: -4px; left: -4px;
+      width: calc(100% + 8px); height: calc(100% + 8px);
+      transform: rotate(-90deg); /* start the fill at 12 o'clock */
+      pointer-events: none;
+    }
+    .ring-track { fill: none; stroke: rgba(243,234,217,.18); stroke-width: 2.5; }
+    .ring-prog {
+      fill: none; stroke: #f2b544; stroke-width: 2.5; stroke-linecap: round;
+      stroke-dasharray: 113.1; stroke-dashoffset: 113.1; /* r=18 → circumference ≈ 113.1 */
+      animation: ringFill 3s linear infinite;
+    }
+    .ring-prog.paused { animation-play-state: paused; }
+    @keyframes ringFill {
+      from { stroke-dashoffset: 113.1; }
+      to   { stroke-dashoffset: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ring-prog { animation: none; opacity: 0; }
     }
   </style>
 </head>
@@ -108,34 +163,35 @@
     <div class="day" style="padding: 22px 26px 0;">
       <div style="display: flex; align-items: baseline; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid rgba(243,234,217,.12);">
         <span style="font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: #d8452f; text-transform: uppercase; letter-spacing: .03em;">Friday</span>
-        <span style="font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .1em; color: #a3927a;">JUL 24</span>
-      </div>
-
-      <div style="display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px solid rgba(243,234,217,.08);">
-        <div style="width: 74px; flex-shrink: 0; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; color: #f2b544; line-height: 1.5;">6–9 PM</div>
-        <div>
-          <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 17px; color: #f3ead9;">Family &amp; Friends Dinner</div>
-          <div style="font-family: 'Barlow', sans-serif; font-size: 14px; color: #c3b295; margin-top: 2px;">Upstream Brewing Co. · Old Market. Dinner at 7. Free beer &amp; wine. <a href="https://www.google.com/maps/search/?api=1&query=Upstream+Brewing+Company+Old+Market+Omaha" target="_blank" style="color:#63c3b0; text-decoration:none; white-space:nowrap;">Map ↗</a></div>
-        </div>
+        <span style="font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .1em; color: #a3927a;">JUL 24 · WARM-UP</span>
       </div>
 
       <div style="display: flex; gap: 14px; padding: 16px 0;">
         <div style="width: 74px; flex-shrink: 0; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; color: #f2b544; line-height: 1.5;">9 PM–late</div>
         <div>
-          <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 17px; color: #f3ead9;">Game Night</div>
-          <div style="font-family: 'Barlow', sans-serif; font-size: 14px; color: #c3b295; margin-top: 2px;">Cambria Hotel event space. Come &amp; go. <a href="https://www.google.com/maps/search/?api=1&query=Cambria+Hotel+Omaha+Downtown" target="_blank" style="color:#63c3b0; text-decoration:none; white-space:nowrap;">Map ↗</a></div>
+          <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 17px; color: #f3ead9;">Game Night <span style="font-weight: 700; font-size: 11px; color: #63c3b0; letter-spacing: .08em;">— OPEN TO ALL</span></div>
+          <div style="font-family: 'Barlow', sans-serif; font-size: 14px; color: #c3b295; margin-top: 2px;">After a family dinner, the party opens up in the Cambria Hotel event space. Cards, games, drinks — come &amp; go. <a href="https://www.google.com/maps/search/?api=1&query=Cambria+Hotel+Omaha+Downtown" target="_blank" style="color:#63c3b0; text-decoration:none; white-space:nowrap;">Map ↗</a></div>
         </div>
       </div>
 
-      <div style="display: flex; gap: 10px; padding: 8px 0 2px;">
-        <div style="flex: 1;">
-          <img src="images/upstream-sign.png" alt="Upstream Brewing Company sign" style="width: 100%; height: 120px; object-fit: cover; border-radius: 10px;">
-          <div style="font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .12em; color: #7d7059; margin-top: 5px; text-transform: uppercase;">Upstream · Old Market</div>
+      <div class="carousel" style="padding: 10px 0 2px;">
+        <div class="carousel-track" id="gameCarousel">
+          <div class="slide"><img src="images/cambria-game-room.png" alt="Cambria Hotel event space" loading="lazy"><div class="cap">The room · Cambria</div></div>
+          <div class="slide"><img src="images/game-crew.jpg" alt="Friends around the table mid-game" loading="lazy"><div class="cap">Game night crew</div></div>
+          <div class="slide"><img src="images/game-arcs.jpg" alt="Playing Arcs board game" loading="lazy"><div class="cap">Arcs</div></div>
+          <div class="slide"><img src="images/game-dungeon.jpg" alt="Fantasy dungeon crawler miniatures" loading="lazy"><div class="cap">Dungeon crawl</div></div>
+          <div class="slide"><img src="images/game-cars.jpg" alt="Post-apocalyptic car combat game" loading="lazy"><div class="cap">Car combat</div></div>
+          <div class="slide"><img src="images/game-racing.jpg" alt="Formula racing board game" loading="lazy"><div class="cap">On the grid</div></div>
+          <div class="slide"><img src="images/game-mechs.jpg" alt="Sci-fi mech tabletop battle" loading="lazy"><div class="cap">Mech battle</div></div>
         </div>
-        <div style="flex: 1;">
-          <img src="images/cambria-game-room.png" alt="Cambria Hotel event space" style="width: 100%; height: 120px; object-fit: cover; border-radius: 10px;">
-          <div style="font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .12em; color: #7d7059; margin-top: 5px; text-transform: uppercase;">Cambria game room</div>
-        </div>
+        <button class="car-btn prev" id="gamePrev" aria-label="Previous photo"><span class="chev">‹</span></button>
+        <button class="car-btn next" id="gameNext" aria-label="Next photo">
+          <svg class="ring" viewBox="0 0 40 40" aria-hidden="true">
+            <circle class="ring-track" cx="20" cy="20" r="18"></circle>
+            <circle class="ring-prog" cx="20" cy="20" r="18"></circle>
+          </svg>
+          <span class="chev">›</span>
+        </button>
       </div>
     </div>
 
@@ -159,13 +215,13 @@
 
       <div style="display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px solid rgba(243,234,217,.08);">
         <div style="width: 74px; flex-shrink: 0; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; color: #f2b544;">6:00 PM</div>
-        <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 17px; color: #f3ead9;">School of Rock Omaha House Band</div>
+        <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 17px; color: #f3ead9;">School of Rock Omaha House Band <span style="display: inline-block; font-family: 'Barlow', sans-serif; font-weight: 800; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: #63c3b0; border: 1px solid rgba(99,195,176,.5); border-radius: 4px; padding: 2px 6px; margin-left: 4px; vertical-align: middle;">♪ Live Music</span></div>
       </div>
 
       <div style="display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px solid rgba(243,234,217,.08);">
         <div style="width: 74px; flex-shrink: 0; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 12px; color: #d8452f;">8:00 PM</div>
         <div>
-          <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 17px; color: #f3ead9;">iPod Shuffle <span style="font-weight: 700; font-size: 11px; color: #d8452f; letter-spacing: .1em;">— ERIC'S BAND</span></div>
+          <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 17px; color: #f3ead9;">iPod Shuffle <span style="font-weight: 700; font-size: 11px; color: #d8452f; letter-spacing: .1em;">— ERIC'S BAND</span> <span style="display: inline-block; font-family: 'Barlow', sans-serif; font-weight: 800; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: #63c3b0; border: 1px solid rgba(99,195,176,.5); border-radius: 4px; padding: 2px 6px; margin-left: 2px; vertical-align: middle;">♪ Live Music</span></div>
           <div style="font-family: 'Barlow', sans-serif; font-size: 14px; color: #c3b295; margin-top: 2px;">Millenial jukebox band.</div>
         </div>
       </div>
@@ -180,18 +236,6 @@
     </div>
 
     </div><!-- /.agenda -->
-
-    <!-- MENU -->
-    <div style="margin: 20px 20px; padding: 26px 24px; background: linear-gradient(180deg, #1a130d, #130e0a); border: 1px solid rgba(242,181,68,.28); border-radius: 12px;">
-      <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: .26em; text-transform: uppercase; color: #f2b544;">Friday Buffet · Free</div>
-      <h2 style="font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 38px; text-transform: uppercase; margin: 6px 0 4px; color: #f3ead9;">Dinner is on the house</h2>
-      <p style="font-family: 'Barlow', sans-serif; font-size: 13px; color: #a3927a; margin: 0 0 16px;">Beer &amp; wine included. RSVP for the headcount.</p>
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div style="display: flex; gap: 12px; align-items: baseline; padding-bottom: 12px; border-bottom: 1px dashed rgba(242,181,68,.22);"><span style="color: #d8452f; font-family: 'Bebas Neue', sans-serif; font-size: 20px;">01</span><span style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 16px; color: #f3ead9;">Prime Rib Roast</span></div>
-        <div style="display: flex; gap: 12px; align-items: baseline; padding-bottom: 12px; border-bottom: 1px dashed rgba(242,181,68,.22);"><span style="color: #e8823a; font-family: 'Bebas Neue', sans-serif; font-size: 20px;">02</span><span style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 16px; color: #f3ead9;">Beer-Braised Bone-In Beef Short Ribs</span></div>
-        <div style="display: flex; gap: 12px; align-items: baseline;"><span style="color: #63c3b0; font-family: 'Bebas Neue', sans-serif; font-size: 20px;">03</span><span style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 16px; color: #f3ead9;">Pepita-Crusted Chicken &amp; Shrimp <span style="font-weight: 400; color: #c3b295;">· chimichurri</span></span></div>
-      </div>
-    </div>
 
     <!-- HOTEL -->
     <div style="padding: 6px 26px 0;">
@@ -216,17 +260,22 @@
       <p style="font-family: 'Barlow', sans-serif; font-size: 14px; color: #d8cbb3; margin: 8px 0 0;">Rides from the Cambria to The B-Side on Saturday night — shuttle, DDs, or Uber. Details soon.</p>
     </div>
 
+    <!-- PRIVATE DINNER LINK (subtle) -->
+    <div style="padding: 8px 26px 0; text-align: center;">
+      <a href="/dinner-details/" style="font-family: 'Barlow', sans-serif; font-size: 13px; color: #7d7059; text-decoration: none; border-bottom: 1px dotted rgba(125,112,89,.6); padding-bottom: 1px;">Looking for family dinner details? →</a>
+    </div>
+
     <!-- FOOTER -->
-    <div style="padding: 32px 26px 28px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+    <div style="padding: 22px 26px 28px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
       <div style="width: 34px; height: 34px; border-radius: 50%; border: 2px solid #efe6d3; overflow: hidden; background: linear-gradient(180deg, #8a3230 0 16%, #d8452f 16% 33%, #e8823a 33% 50%, #f2b544 50% 66%, #63c3b0 66% 83%, #3f7ca0 83% 100%);"></div>
       <div style="font-family: 'Space Mono', monospace; font-size: 11px; color: #7d7059;">ericsoldafbdayweekend.com</div>
     </div>
 
   </div>
 
-  <!-- STICKY RSVP -->
+  <!-- STICKY CTA -->
   <div class="rsvp-bar">
-    <a href="https://forms.gle/CtWBv27NWe5kvWJB9" target="_blank">RSVP for dinner →</a>
+    <a href="https://www.google.com/maps/search/?api=1&query=B-Side+Barleys+Council+Bluffs" target="_blank" rel="noopener">Saturday · Get directions to the show →</a>
   </div>
 
   <script>
@@ -247,6 +296,48 @@
       }
       tick();
       setInterval(tick, 1000);
+    })();
+
+    // Game-night carousel: wrap-around arrows + 3s auto-rotate driven by the ring fill
+    (function () {
+      var track = document.getElementById('gameCarousel');
+      if (!track) return;
+      var slide = track.querySelector('.slide');
+      var ring = document.querySelector('#gameNext .ring-prog');
+      function w() { return slide.getBoundingClientRect().width + 12; } // slide + gap
+      function atEnd() { return track.scrollLeft >= (track.scrollWidth - track.clientWidth - 8); }
+      function atStart() { return track.scrollLeft <= 8; }
+      function next() {
+        if (atEnd()) track.scrollTo({ left: 0, behavior: 'smooth' });          // last → first
+        else track.scrollBy({ left: w(), behavior: 'smooth' });
+      }
+      function prev() {
+        if (atStart()) track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' }); // first → last
+        else track.scrollBy({ left: -w(), behavior: 'smooth' });
+      }
+
+      // restart the ring animation from 0 so the 3s clock resets after a manual move
+      function resetRing() {
+        if (!ring) return;
+        ring.style.animation = 'none';
+        void ring.offsetWidth; // force reflow
+        ring.style.animation = '';
+      }
+
+      // the ring completes one loop every 3s → advance on each completion (stays in sync)
+      if (ring) ring.addEventListener('animationiteration', next);
+
+      function pause() { if (ring) ring.classList.add('paused'); }
+      function resume() { if (ring) ring.classList.remove('paused'); }
+
+      document.getElementById('gameNext').addEventListener('click', function () { next(); resetRing(); });
+      document.getElementById('gamePrev').addEventListener('click', function () { prev(); resetRing(); });
+
+      // pause while touching/hovering, resume after
+      track.addEventListener('mouseenter', pause);
+      track.addEventListener('mouseleave', resume);
+      track.addEventListener('touchstart', pause, { passive: true });
+      track.addEventListener('touchend', function () { setTimeout(resume, 3000); }, { passive: true });
     })();
   </script>
 </body>

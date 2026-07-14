@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Hunt · Eric's 40th</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="A little scavenger hunt for the weekend. Check things off as you go.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: #0a0806;
+      color: #f3ead9;
+      font-family: 'Barlow', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .site {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #100c0a;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+    a { color: inherit; }
+
+    /* progress bar */
+    .bar-track {
+      height: 12px; border-radius: 999px;
+      background: rgba(243,234,217,.08);
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #d8452f, #e8823a 40%, #f2b544 70%, #63c3b0);
+      border-radius: 999px;
+      transition: width .35s ease;
+    }
+
+    /* task rows */
+    .task {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 16px 4px;
+      border-bottom: 1px solid rgba(243,234,217,.08);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .box {
+      flex-shrink: 0;
+      width: 26px; height: 26px; margin-top: 1px;
+      border-radius: 7px;
+      border: 2px solid #a3927a;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Barlow', sans-serif; font-weight: 800; font-size: 15px;
+      color: #100c0a;
+      transition: background .15s ease, border-color .15s ease;
+    }
+    .task.done .box {
+      background: #63c3b0; border-color: #63c3b0;
+    }
+    .task .label {
+      font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 16px;
+      color: #f3ead9; line-height: 1.35;
+    }
+    .task .hint {
+      font-family: 'Barlow', sans-serif; font-size: 13px; color: #a3927a; margin-top: 2px;
+    }
+    .task.done .label { color: #7d7059; text-decoration: line-through; }
+
+    .reset {
+      display: inline-block; margin-top: 22px;
+      font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .1em;
+      color: #7d7059; text-decoration: none;
+      border: 1px solid rgba(125,112,89,.4); border-radius: 6px;
+      padding: 8px 12px; cursor: pointer; background: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="site">
+
+    <!-- BACK -->
+    <div style="padding: 18px 26px 0;">
+      <a href="/" style="font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .1em; color: #7d7059; text-decoration: none;">← back to the weekend</a>
+    </div>
+
+    <!-- HEADER -->
+    <div style="padding: 22px 26px 8px;">
+      <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #f2b544;">Secret Side Quest</div>
+      <h1 style="font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 56px; line-height: .84; letter-spacing: .02em; text-transform: uppercase; margin: 10px 0 0; color: #f3ead9;">The 40th<br><span style="color: #e8823a;">Scavenger Hunt</span></h1>
+      <p style="font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 15px; color: #d8cbb3; margin: 14px 0 0;">Tap each mission as you pull it off this weekend. Progress saves right here on your phone — no login, no app. Just don't clear your browser. 😉</p>
+    </div>
+
+    <!-- PROGRESS -->
+    <div style="padding: 18px 26px 6px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+        <span id="count" style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #f3ead9;">0 / 0</span>
+        <span id="pct" style="font-family: 'Space Mono', monospace; font-size: 12px; color: #a3927a;">0%</span>
+      </div>
+      <div class="bar-track"><div id="fill" class="bar-fill"></div></div>
+      <div id="celebrate" style="display:none; margin-top: 14px; padding: 14px 16px; border-radius: 10px; background: rgba(99,195,176,.1); border: 1px solid rgba(99,195,176,.35); font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 15px; color: #63c3b0;">🏆 Legend. You cleared the whole hunt — go find Eric and collect your bragging rights.</div>
+    </div>
+
+    <!-- TASK LIST (rendered by script) -->
+    <div id="list" style="padding: 8px 26px 0;"></div>
+
+    <div style="padding: 4px 26px 0;">
+      <button id="reset" class="reset">↺ Reset my progress</button>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="padding: 30px 26px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+      <div style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid #efe6d3; overflow: hidden; background: linear-gradient(180deg, #8a3230 0 16%, #d8452f 16% 33%, #e8823a 33% 50%, #f2b544 50% 66%, #63c3b0 66% 83%, #3f7ca0 83% 100%);"></div>
+      <div style="font-family: 'Space Mono', monospace; font-size: 11px; color: #7d7059;">ericsoldafbdayweekend.com</div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ============================================================
+       EDIT YOUR SCAVENGER HUNT HERE.
+       - Add / remove / reword tasks freely.
+       - Each task needs a unique "id" (used to save progress) and a "label".
+       - "hint" is optional (the small grey line under the label).
+       - IMPORTANT: keep each id stable once people start playing —
+         changing an id resets that item for everyone.
+       ============================================================ */
+    var TASKS = [
+      { id: "selfie",     label: "Get a selfie with the birthday boy",        hint: "Bonus points if he's mid-song." },
+      { id: "merch",      label: "Find someone wearing band merch",           hint: "Snap a pic of the shirt." },
+      { id: "request",    label: "Request a song at rockon.band",             hint: "Then cheer when it plays." },
+      { id: "drink",      label: "Buy a stranger a drink",                    hint: "Make a new friend." },
+      { id: "dancefloor", label: "Be on the dance floor for the first song of iPod Shuffle", hint: "Eric's band, 8 PM." },
+      { id: "cheers",     label: "Toast to 40 years with someone you just met" },
+      { id: "cambria",    label: "Win a round at Friday game night",          hint: "Cards, dice, whatever's on the table." },
+      { id: "photo3",     label: "Get a group photo with 5+ people in it" },
+      { id: "jam",        label: "Stay for the open jam",                     hint: "Til 2 AM if you dare." },
+      { id: "gift",       label: "Tell Eric your favorite memory of him",     hint: "The real gift." }
+    ];
+    /* ============================================================ */
+
+    var STORAGE_KEY = "erics40_hunt_v1";
+
+    function loadState() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+      catch (e) { return {}; }
+    }
+    function saveState(state) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    var state = loadState();
+    var listEl = document.getElementById('list');
+    var countEl = document.getElementById('count');
+    var pctEl = document.getElementById('pct');
+    var fillEl = document.getElementById('fill');
+    var celebrateEl = document.getElementById('celebrate');
+
+    function render() {
+      listEl.innerHTML = '';
+      var done = 0;
+      TASKS.forEach(function (t) {
+        var isDone = !!state[t.id];
+        if (isDone) done++;
+        var row = document.createElement('div');
+        row.className = 'task' + (isDone ? ' done' : '');
+        row.setAttribute('role', 'button');
+        row.setAttribute('tabindex', '0');
+        var hint = t.hint ? '<div class="hint">' + t.hint + '</div>' : '';
+        row.innerHTML =
+          '<div class="box">' + (isDone ? '✓' : '') + '</div>' +
+          '<div><div class="label">' + t.label + '</div>' + hint + '</div>';
+        row.addEventListener('click', function () { toggle(t.id); });
+        row.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(t.id); }
+        });
+        listEl.appendChild(row);
+      });
+
+      var total = TASKS.length;
+      var pct = total ? Math.round((done / total) * 100) : 0;
+      countEl.textContent = done + ' / ' + total;
+      pctEl.textContent = pct + '%';
+      fillEl.style.width = pct + '%';
+      celebrateEl.style.display = (done === total && total > 0) ? 'block' : 'none';
+    }
+
+    function toggle(id) {
+      if (state[id]) { delete state[id]; }
+      else { state[id] = true; }
+      saveState(state);
+      render();
+    }
+
+    document.getElementById('reset').addEventListener('click', function () {
+      if (confirm('Reset all your hunt progress on this device?')) {
+        state = {};
+        saveState(state);
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
