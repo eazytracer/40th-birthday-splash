@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Gym Challenge · Eric's 40th</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Eric's 40th Gym Challenge — solve the lore, beat 8 gym leaders, collect badges, trade up for booster packs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: #0a0806;
+      color: #f3ead9;
+      font-family: 'Barlow', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .site {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #100c0a;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+    a { color: inherit; }
+
+    /* progress bar */
+    .bar-track {
+      position: relative;
+      height: 12px; border-radius: 999px;
+      background: rgba(243,234,217,.08);
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #d8452f, #e8823a 40%, #f2b544 70%, #63c3b0);
+      border-radius: 999px;
+      transition: width .35s ease;
+    }
+    .tick {
+      position: absolute; top: -1px; bottom: -1px; width: 2px;
+      transform: translateX(-1px);
+      background: rgba(10,8,6,.9);
+      box-shadow: 0 0 3px rgba(0,0,0,.6);
+      z-index: 2;
+    }
+    .tick-labels {
+      position: relative; height: 13px; margin-top: 4px;
+      font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .04em;
+      color: #7d7059; text-transform: uppercase;
+    }
+    .tick-label {
+      position: absolute; transform: translateX(-50%); white-space: nowrap;
+    }
+
+    /* gym cards */
+    .gym {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 15px;
+      margin-bottom: 12px;
+      background: linear-gradient(180deg, #170f0b, #120d09);
+      border: 1px solid rgba(243,234,217,.10);
+      border-radius: 12px;
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color .15s ease;
+    }
+    .gym.earned { border-color: rgba(242,181,68,.42); }
+    .badge {
+      position: relative; flex-shrink: 0;
+      width: 58px; height: 58px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .badge-img {
+      width: 100%; height: 100%; object-fit: contain;
+      filter: grayscale(1) brightness(.85); opacity: .45;
+      transition: filter .25s ease, opacity .25s ease;
+    }
+    .gym:not(.locked):not(.earned) .badge-img { filter: grayscale(.6) brightness(.95); opacity: .7; }
+    .gym.earned .badge-img { filter: drop-shadow(0 0 7px rgba(242,181,68,.8)); opacity: 1; }
+    .badge .lock {
+      position: absolute; font-size: 18px; color: #f3ead9;
+      text-shadow: 0 1px 4px rgba(0,0,0,.9); display: none;
+    }
+    .gym.locked .badge .lock { display: block; }
+
+    /* badge case — the trophy shelf under the progress bar */
+    .case { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; }
+    .case img {
+      width: 32px; height: 32px; object-fit: contain;
+      filter: grayscale(1) brightness(.7); opacity: .38;
+      transition: filter .25s ease, opacity .25s ease;
+    }
+    .case img.on { filter: drop-shadow(0 0 5px rgba(242,181,68,.75)); opacity: 1; }
+
+    .gym-body { flex: 1; min-width: 0; }
+    .gym-type {
+      font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .12em;
+      text-transform: uppercase; color: #8a7a5f;
+    }
+    .gym-name {
+      font-family: 'Bebas Neue', sans-serif; font-size: 23px; letter-spacing: .02em;
+      text-transform: uppercase; color: #f3ead9; line-height: 1; margin-top: 1px;
+    }
+    .gym.earned .gym-name { color: #d8cbb3; }
+    .gym-chal {
+      font-family: 'Barlow', sans-serif; font-weight: 800; font-size: 13px;
+      letter-spacing: .02em; color: #f2b544; margin-top: 6px;
+    }
+    .gym-desc {
+      font-family: 'Barlow', sans-serif; font-size: 13px; color: #c3b295;
+      margin-top: 3px; line-height: 1.42;
+    }
+    .gym-where {
+      font-family: 'Space Mono', monospace; font-size: 9.5px; letter-spacing: .04em;
+      color: #7d7059; margin-top: 7px; text-transform: uppercase;
+    }
+    .gym-link { color: #63c3b0; text-decoration: none; white-space: nowrap; }
+
+    /* trivia lock */
+    .lock-label {
+      font-family: 'Space Mono', monospace; font-size: 9.5px; letter-spacing: .1em;
+      text-transform: uppercase; color: #a3927a; margin-top: 8px;
+    }
+    .trivia-q {
+      font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 14px;
+      color: #f3ead9; margin-top: 5px; line-height: 1.35;
+    }
+    .opts { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+    .opt {
+      text-align: left; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 13px;
+      color: #e7dcc6; background: rgba(243,234,217,.05);
+      border: 1px solid rgba(243,234,217,.14); border-radius: 8px;
+      padding: 9px 11px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .opt:hover { border-color: rgba(242,181,68,.5); }
+    .opt.wrong { border-color: #d8452f; background: rgba(216,69,47,.12); color: #f0b8ac; }
+
+    /* claim / pin */
+    .claim-btn {
+      margin-top: 11px; display: inline-flex; align-items: center; gap: 6px;
+      background: #63c3b0; color: #0a0806; border: none; border-radius: 8px;
+      font-family: 'Barlow', sans-serif; font-weight: 800; font-size: 13px;
+      letter-spacing: .02em; padding: 10px 14px; cursor: pointer;
+    }
+    .pin-wrap {
+      margin-top: 11px; padding: 12px;
+      border: 1px solid rgba(242,181,68,.3); border-radius: 10px;
+      background: rgba(242,181,68,.05);
+    }
+    .pin-label {
+      font-family: 'Space Mono', monospace; font-size: 9.5px; letter-spacing: .08em;
+      text-transform: uppercase; color: #f2b544;
+    }
+    .pin-row { display: flex; gap: 8px; margin-top: 8px; }
+    .pin-input {
+      flex: 1; min-width: 0; background: #0a0806;
+      border: 1px solid rgba(243,234,217,.2); border-radius: 8px; color: #f3ead9;
+      font-family: 'Space Mono', monospace; font-size: 20px; letter-spacing: .4em;
+      text-align: center; padding: 9px;
+    }
+    .pin-input:focus { outline: none; border-color: #f2b544; }
+    .pin-submit {
+      flex-shrink: 0; background: #f2b544; color: #1a1206; border: none; border-radius: 8px;
+      font-family: 'Barlow', sans-serif; font-weight: 800; font-size: 13px; padding: 0 16px; cursor: pointer;
+    }
+    .pin-cancel {
+      display: inline-block; margin-top: 9px; background: none; border: none;
+      color: #7d7059; font-family: 'Space Mono', monospace; font-size: 10px;
+      cursor: pointer; text-decoration: underline;
+    }
+    .shake { animation: shake .3s ease; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    .feedback {
+      font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 12px;
+      margin-top: 9px; min-height: 15px;
+    }
+    .feedback.bad { color: #e8823a; }
+    .feedback.good { color: #63c3b0; }
+    .earned-tag {
+      margin-top: 10px; font-family: 'Barlow', sans-serif; font-weight: 800;
+      font-size: 12px; letter-spacing: .04em; color: #63c3b0;
+    }
+
+    .reset {
+      display: inline-block; margin-top: 22px;
+      font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .1em;
+      color: #7d7059; text-decoration: none;
+      border: 1px solid rgba(125,112,89,.4); border-radius: 6px;
+      padding: 8px 12px; cursor: pointer; background: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="site">
+
+    <!-- HERO · Kanto map -->
+    <div style="position: relative; overflow: hidden;">
+      <div style="position: absolute; inset: 0; background: #0e1a12 url('/images/1024px-PE_Kanto_Map.png') center/cover; opacity: .55;"></div>
+      <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(16,12,10,.4) 0%, rgba(16,12,10,.72) 58%, #100c0a 100%);"></div>
+      <div style="position: relative; padding: 18px 26px 22px;">
+        <a href="/" style="font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .1em; color: #cbbda0; text-decoration: none; text-shadow: 0 1px 3px rgba(0,0,0,.8);">← back to the weekend</a>
+        <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #f2b544; margin-top: 22px; text-shadow: 0 1px 3px rgba(0,0,0,.8);">Secret Side Quest · 8 Gyms</div>
+        <h1 style="font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 56px; line-height: .84; letter-spacing: .02em; text-transform: uppercase; margin: 10px 0 0; color: #f3ead9; text-shadow: 0 2px 12px rgba(0,0,0,.7);">The Gym<br><span style="color: #f0954a;">Challenge</span></h1>
+        <p style="font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 15px; color: #e4d8c0; margin: 14px 0 0; line-height: 1.5; text-shadow: 0 1px 4px rgba(0,0,0,.7);">Eight friends &amp; family are moonlighting as <strong style="color:#fff;">Gym Leaders</strong>. Every 3 badges trades up for booster packs. Eric is the Champion. Gotta collect 'em all.</p>
+        <p style="font-family: 'Barlow', sans-serif; font-size: 13px; color: #bcae95; margin: 12px 0 0; line-height: 1.55;"><strong style="color:#d8cbb3;">1.</strong> Answer a bit of Eric lore to unlock each gym's mission. &nbsp;<strong style="color:#d8cbb3;">2.</strong> Pull it off in real life. &nbsp;<strong style="color:#d8cbb3;">3.</strong> The Gym Leader punches in their PIN to award the badge. Progress saves on your phone.</p>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div style="padding: 18px 26px 6px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+        <span id="count" style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #f3ead9;">0 / 0</span>
+        <span id="pct" style="font-family: 'Space Mono', monospace; font-size: 12px; color: #a3927a;">0%</span>
+      </div>
+      <div id="track" class="bar-track"><div id="fill" class="bar-fill"></div></div>
+      <div id="ticklabels" class="tick-labels"></div>
+      <div id="case" class="case"></div>
+      <div id="status" style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 13px; color: #63c3b0; margin-top: 12px; min-height: 17px;"></div>
+      <div id="celebrate" style="display:none; margin-top: 8px; padding: 14px 16px; border-radius: 10px; background: rgba(99,195,176,.1); border: 1px solid rgba(99,195,176,.35); font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 15px; color: #63c3b0;">🏆 Champion! All eight badges. Claim your premium pack from Eric and enter the best-pull showdown at last call.</div>
+    </div>
+
+    <!-- GYM LIST (rendered by script) -->
+    <div id="list" style="padding: 14px 26px 0;"></div>
+
+    <!-- REWARDS LADDER -->
+    <div style="margin: 8px 26px 0; padding: 22px 20px; background: linear-gradient(180deg, #1a130d, #130e0a); border: 1px solid rgba(242,181,68,.28); border-radius: 12px;">
+      <div style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: .26em; text-transform: uppercase; color: #f2b544;">Trade Up · Prize Table</div>
+      <h2 style="font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 34px; text-transform: uppercase; margin: 6px 0 14px; color: #f3ead9;">Badges → Boosters</h2>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; gap: 12px; align-items: baseline; padding-bottom: 12px; border-bottom: 1px dashed rgba(242,181,68,.22);"><span style="color: #d8452f; font-family: 'Bebas Neue', sans-serif; font-size: 22px; flex-shrink:0;">3</span><span style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 15px; color: #f3ead9;">badges &nbsp;→&nbsp; a modern booster pack</span></div>
+        <div style="display: flex; gap: 12px; align-items: baseline; padding-bottom: 12px; border-bottom: 1px dashed rgba(242,181,68,.22);"><span style="color: #e8823a; font-family: 'Bebas Neue', sans-serif; font-size: 22px; flex-shrink:0;">6</span><span style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 15px; color: #f3ead9;">badges &nbsp;→&nbsp; a second booster pack</span></div>
+        <div style="display: flex; gap: 12px; align-items: baseline; padding-bottom: 12px; border-bottom: 1px dashed rgba(242,181,68,.22);"><span style="color: #63c3b0; font-family: 'Bebas Neue', sans-serif; font-size: 22px; flex-shrink:0;">8</span><span style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 15px; color: #f3ead9;">all badges &nbsp;→&nbsp; a premium pack <span style="font-weight:400; color:#c3b295;">· the good stuff</span></span></div>
+        <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-size: 20px; flex-shrink:0;">👑</span><span style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 15px; color: #f3ead9;">Best single pull of the night &nbsp;→&nbsp; a sealed box</span></div>
+      </div>
+    </div>
+
+    <div style="padding: 18px 26px 0;">
+      <button id="reset" class="reset">↺ Reset my badges</button>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="padding: 30px 26px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+      <div style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid #efe6d3; overflow: hidden; background: linear-gradient(180deg, #8a3230 0 16%, #d8452f 16% 33%, #e8823a 33% 50%, #f2b544 50% 66%, #63c3b0 66% 83%, #3f7ca0 83% 100%);"></div>
+      <div style="font-family: 'Space Mono', monospace; font-size: 11px; color: #7d7059;">ericsoldafbdayweekend.com</div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ============================================================
+       EDIT YOUR GYM CHALLENGE HERE.
+
+       Each gym has TWO locks:
+         • trivia  — an Eric-lore multiple-choice question that reveals
+                     the mission.  "answer" is the 0-based index of the
+                     correct option.
+         • pin     — the Gym Leader's 4-digit PIN, entered on the
+                     trainer's phone to award the badge.
+
+       >>> TEST MODE: every pin is "1234". Replace with each leader's
+           real PIN before the party. <<<
+
+       Questions marked PLACEHOLDER still need real Eric trivia — swap in
+       the question, the four options, and the correct "answer" index.
+
+       Keep each "id" stable once people start playing — changing an id
+       resets that badge for everyone.
+       ============================================================ */
+    var GYMS = [
+      { id:"rock", num:1, type:"Rock Type", badge:"Boulder Badge", leader:"Brock", color:"#b0895a",
+        img:"/images/800px-Boulder_Badge.png",
+        chal:"Support the Scene",
+        desc:"You can't rock without a solid foundation. Follow the local acts on Instagram (or Facebook where they've got it): <strong style=\"color:#e7dcc6\">Anxiety, Ugly Lotus, Midusa, Garlick, Horsebait, Waiting for Parry, Settling Houses</strong> — plus <strong style=\"color:#e7dcc6\">The B-Side Bar</strong> &amp; <strong style=\"color:#e7dcc6\">School of Rock Omaha</strong>.",
+        where:"Find Brock · merch table",
+        pin:"1234" },
+
+      { id:"water", num:2, type:"Water Type", badge:"Cascade Badge", leader:"Misty", color:"#3f7ca0",
+        img:"/images/800px-Cascade_Badge.png",
+        chal:"Quench",
+        desc:"Make a splash — grab any drink from the bar. Water counts, so every trainer can play. Cheers with your bartender.",
+        where:"Find Misty · the bar",
+        pin:"1234",
+        trivia:{ q:"What was Eric's nickname as a kid?",
+                 options:["Sport", "Bug", "Bear", "Chief"], answer:1 } },
+
+      { id:"poison", num:3, type:"Poison Type", badge:"Soul Badge", leader:"Koga", color:"#9b6bc4",
+        img:"/images/800px-Soul_Badge.png",
+        chal:"Pick Your Poison",
+        desc:"Find a trainer you haven't met, clink glasses, and learn one thing about them. Two new souls, one toast — both of you claim it.",
+        where:"Find Koga · roaming the floor",
+        pin:"1234",
+        trivia:{ q:"What was Eric's first (and last) race car number?",
+                 options:["7", "13", "40", "88"], answer:1 } },
+
+      { id:"electric", num:4, type:"Electric Type", badge:"Thunder Badge", leader:"Lt. Surge", color:"#f2b544",
+        img:"/images/800px-Thunder_Badge.png",
+        chal:"Light It Up",
+        desc:"When iPod Shuffle plays \"Where Is My Mind,\" raise your phone flashlight and light up the room. Get caught glowing.",
+        where:"Find Lt. Surge · stage-side",
+        pin:"1234",
+        trivia:{ q:"Eric ran gameday announcements & promotions for three Omaha teams. Which one did he NOT?",
+                 options:["Omaha Beef", "Omaha Storm Chasers", "Omaha Nighthawks", "Omaha Mammoths"], answer:1 } },
+
+      { id:"grass", num:5, type:"Grass Type", badge:"Rainbow Badge", leader:"Erika", color:"#6bbf59",
+        img:"/images/800px-Rainbow_Badge.png",
+        chal:"Grow the Next Gen",
+        desc:"Plant a seed, grow a rockstar. Donate $5 to the Future Rockers of Omaha Foundation — <a class=\"gym-link\" href=\"https://futurerockersofomaha.org/donate\" target=\"_blank\" rel=\"noopener\">donate online ↗</a>, cash, or grab a <a class=\"gym-link\" href=\"https://www.zeffy.com/en-US/ticketing/2026-metal-horns-sculpture-raffle\" target=\"_blank\" rel=\"noopener\">sculpture raffle ticket ↗</a>.",
+        where:"Find Erika · Future Rockers table",
+        pin:"1234",
+        trivia:{ q:"What was Eric's primary job in the Air Force?",
+                 options:["Aircraft mechanic", "Weather forecaster", "Air traffic controller", "Intelligence analyst"], answer:1 } },
+
+      { id:"psychic", num:6, type:"Psychic Type", badge:"Marsh Badge", leader:"Sabrina", color:"#d86a9c",
+        img:"/images/800px-Marsh_Badge.png",
+        chal:"Board of Dreams",
+        desc:"Sabrina sees what's ahead. Write down a dream — for this year or the next 40 — and pin it to the Board of Dreams. Read one someone else left.",
+        where:"Find Sabrina · Board of Dreams",
+        pin:"1234",
+        trivia:{ q:"What instrument did Eric play in middle school band?",
+                 options:["Trombone", "Saxophone", "Trumpet", "Drums"], answer:2 } },
+
+      { id:"fire", num:7, type:"Fire Type", badge:"Volcano Badge", leader:"Blaine", color:"#d8452f",
+        img:"/images/800px-Volcano_Badge.png",
+        chal:"Bring the Heat",
+        desc:"Feel the burn — put in a song request or hop on stage during the open jam. Amateurs welcome; that's the whole point.",
+        where:"Find Blaine · the open-jam host",
+        pin:"1234",
+        trivia:{ q:"What hurricane did Eric ride out while in Air Force tech school?",
+                 options:["Rita", "Katrina", "Ike", "Andrew"], answer:1 } },
+
+      { id:"ground", num:8, type:"Ground Type · Final Gym", badge:"Earth Badge", leader:"Giovanni", color:"#e8823a",
+        img:"/images/800px-Earth_Badge.png",
+        chal:"The Ground Shakes",
+        desc:"Nothing moves the earth like a packed floor — round up a crew and get a group photo on the dance floor with the birthday boy.",
+        where:"Find Giovanni · the Champion himself",
+        pin:"1234",
+        trivia:{ q:"What nickname does Eric use for his Miata track car?",
+                 options:["Kewl Whip", "Miatanic", "The Cream Puff", "Slowpoke"], answer:0 } }
+    ];
+    /* ============================================================ */
+
+    var STORAGE_KEY = "erics40_gym_v2";
+
+    // state[id] = { u: 1 (mission unlocked), e: 1 (badge earned) }
+    function loadState() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+      catch (e) { return {}; }
+    }
+    function saveState() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+    function get(id) { return state[id] || {}; }
+
+    var state = loadState();
+    var claimingId = null; // transient: which gym is showing its PIN pad
+
+    var listEl = document.getElementById('list');
+    var countEl = document.getElementById('count');
+    var pctEl = document.getElementById('pct');
+    var fillEl = document.getElementById('fill');
+    var statusEl = document.getElementById('status');
+    var celebrateEl = document.getElementById('celebrate');
+    var caseEl = document.getElementById('case');
+    var trackEl = document.getElementById('track');
+    var tickLabelsEl = document.getElementById('ticklabels');
+
+    // Booster-pack thresholds — vertical marks on the progress bar.
+    var THRESHOLDS = [
+      { n: 3, label: "1st pack" },
+      { n: 6, label: "2nd pack" }
+    ];
+    function buildTicks() {
+      var total = GYMS.length;
+      if (!total) return;
+      THRESHOLDS.forEach(function (t) {
+        if (t.n >= total) return; // full bar already marks the last tier
+        var pct = (t.n / total) * 100;
+        var tick = document.createElement('div');
+        tick.className = 'tick';
+        tick.style.left = pct + '%';
+        trackEl.appendChild(tick);
+        var lab = document.createElement('span');
+        lab.className = 'tick-label';
+        lab.style.left = pct + '%';
+        lab.textContent = t.n + ' · ' + t.label;
+        tickLabelsEl.appendChild(lab);
+      });
+    }
+
+    function statusFor(n, total) {
+      if (n >= total) return "👑 All 8 — premium pack unlocked!";
+      if (n >= 6) return "🎴 6 badges — grab your 2nd pack. Two more for the premium!";
+      if (n >= 3) return "🎴 3 badges — claim a booster pack at the prize table!";
+      if (n >= 1) return (3 - n) + " more for your first booster pack.";
+      return "";
+    }
+
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function buildGym(g) {
+      var st = get(g.id);
+      var unlocked = !!st.u || !g.trivia, earned = !!st.e;
+      var row = document.createElement('div');
+      row.className = 'gym' + (earned ? ' earned' : (unlocked ? '' : ' locked'));
+
+      row.innerHTML =
+        '<div class="badge">' +
+          '<img class="badge-img" src="' + g.img + '" alt="' + esc(g.badge) + '" loading="lazy">' +
+          '<span class="lock">🔒</span></div>' +
+        '<div class="gym-body">' +
+          '<div class="gym-type">Gym ' + g.num + ' · ' + g.type + ' · ' + g.leader + '</div>' +
+          '<div class="gym-name">' + g.badge + '</div>' +
+          '<div class="slot"></div>' +
+        '</div>';
+      var slot = row.querySelector('.slot');
+
+      if (!unlocked) {
+        // ---- trivia lock ----
+        var opts = g.trivia.options.map(function (o, i) {
+          return '<button class="opt" type="button" data-i="' + i + '">' + esc(o) + '</button>';
+        }).join('');
+        slot.innerHTML =
+          '<div class="lock-label">🔒 Answer to unlock the mission</div>' +
+          '<div class="trivia-q">' + esc(g.trivia.q) + '</div>' +
+          '<div class="opts">' + opts + '</div>' +
+          '<div class="feedback"></div>';
+        var fb = slot.querySelector('.feedback');
+        slot.querySelectorAll('.opt').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var i = parseInt(btn.getAttribute('data-i'), 10);
+            if (i === g.trivia.answer) {
+              state[g.id] = { u: 1 };
+              saveState();
+              render();
+            } else {
+              btn.classList.add('wrong');
+              fb.className = 'feedback bad';
+              fb.textContent = "Not quite — ask around and try again. 😉";
+            }
+          });
+        });
+      } else {
+        // ---- mission revealed ----
+        var link = g.link ? ' <a class="gym-link" href="' + g.link.href + '" target="_blank" rel="noopener">' + g.link.text + '</a>' : '';
+        var html =
+          '<div class="gym-chal">' + esc(g.chal) + '</div>' +
+          '<div class="gym-desc">' + g.desc + link + '</div>' +
+          '<div class="gym-where">' + esc(g.where) + '</div>';
+
+        if (earned) {
+          html += '<div class="earned-tag">✓ Badge earned</div>';
+          slot.innerHTML = html;
+        } else if (claimingId === g.id) {
+          // ---- PIN pad ----
+          html +=
+            '<div class="pin-wrap">' +
+              '<div class="pin-label">Gym Leader: enter your 4-digit PIN</div>' +
+              '<div class="pin-row">' +
+                '<input class="pin-input" type="tel" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••">' +
+                '<button class="pin-submit" type="button">Award</button>' +
+              '</div>' +
+              '<div class="feedback"></div>' +
+            '</div>' +
+            '<button class="pin-cancel" type="button">cancel</button>';
+          slot.innerHTML = html;
+          var input = slot.querySelector('.pin-input');
+          var submit = slot.querySelector('.pin-submit');
+          var pinWrap = slot.querySelector('.pin-wrap');
+          var pfb = slot.querySelector('.feedback');
+          function tryPin() {
+            if (input.value === g.pin) {
+              state[g.id] = { u: 1, e: 1 };
+              saveState();
+              claimingId = null;
+              render();
+            } else {
+              pfb.className = 'feedback bad';
+              pfb.textContent = "Wrong PIN — that's the Gym Leader's to enter.";
+              pinWrap.classList.remove('shake');
+              void pinWrap.offsetWidth;
+              pinWrap.classList.add('shake');
+              input.value = '';
+              input.focus();
+            }
+          }
+          submit.addEventListener('click', tryPin);
+          input.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryPin(); });
+          slot.querySelector('.pin-cancel').addEventListener('click', function () {
+            claimingId = null; render();
+          });
+        } else {
+          // ---- ready to claim ----
+          html += '<button class="claim-btn" type="button">I did it — claim badge →</button>';
+          slot.innerHTML = html;
+          slot.querySelector('.claim-btn').addEventListener('click', function () {
+            claimingId = g.id; render();
+          });
+        }
+      }
+      return row;
+    }
+
+    function render() {
+      listEl.innerHTML = '';
+      caseEl.innerHTML = '';
+      var done = 0;
+      GYMS.forEach(function (g) {
+        var earned = !!get(g.id).e;
+        if (earned) done++;
+        listEl.appendChild(buildGym(g));
+        var mini = document.createElement('img');
+        mini.src = g.img;
+        mini.alt = g.badge;
+        if (earned) mini.className = 'on';
+        caseEl.appendChild(mini);
+      });
+
+      var total = GYMS.length;
+      var pct = total ? Math.round((done / total) * 100) : 0;
+      countEl.textContent = done + ' / ' + total;
+      pctEl.textContent = pct + '%';
+      fillEl.style.width = pct + '%';
+      statusEl.textContent = statusFor(done, total);
+      celebrateEl.style.display = (done === total && total > 0) ? 'block' : 'none';
+
+      if (claimingId) {
+        var inp = listEl.querySelector('.pin-input');
+        if (inp) inp.focus();
+      }
+    }
+
+    document.getElementById('reset').addEventListener('click', function () {
+      if (confirm('Reset all your badges and unlocked missions on this device?')) {
+        state = {};
+        claimingId = null;
+        saveState();
+        render();
+      }
+    });
+
+    buildTicks();
+    render();
+  </script>
+</body>
+</html>
