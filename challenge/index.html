@@ -29,6 +29,7 @@
 
     /* progress bar */
     .bar-track {
+      position: relative;
       height: 12px; border-radius: 999px;
       background: rgba(243,234,217,.08);
       overflow: hidden;
@@ -38,6 +39,21 @@
       background: linear-gradient(90deg, #d8452f, #e8823a 40%, #f2b544 70%, #63c3b0);
       border-radius: 999px;
       transition: width .35s ease;
+    }
+    .tick {
+      position: absolute; top: -1px; bottom: -1px; width: 2px;
+      transform: translateX(-1px);
+      background: rgba(10,8,6,.9);
+      box-shadow: 0 0 3px rgba(0,0,0,.6);
+      z-index: 2;
+    }
+    .tick-labels {
+      position: relative; height: 13px; margin-top: 4px;
+      font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .04em;
+      color: #7d7059; text-transform: uppercase;
+    }
+    .tick-label {
+      position: absolute; transform: translateX(-50%); white-space: nowrap;
     }
 
     /* gym cards */
@@ -203,7 +219,8 @@
         <span id="count" style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #f3ead9;">0 / 0</span>
         <span id="pct" style="font-family: 'Space Mono', monospace; font-size: 12px; color: #a3927a;">0%</span>
       </div>
-      <div class="bar-track"><div id="fill" class="bar-fill"></div></div>
+      <div id="track" class="bar-track"><div id="fill" class="bar-fill"></div></div>
+      <div id="ticklabels" class="tick-labels"></div>
       <div id="case" class="case"></div>
       <div id="status" style="font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 13px; color: #63c3b0; margin-top: 12px; min-height: 17px;"></div>
       <div id="celebrate" style="display:none; margin-top: 8px; padding: 14px 16px; border-radius: 10px; background: rgba(99,195,176,.1); border: 1px solid rgba(99,195,176,.35); font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 15px; color: #63c3b0;">🏆 Champion! All eight badges. Claim your premium pack from Eric and enter the best-pull showdown at last call.</div>
@@ -260,12 +277,9 @@
       { id:"rock", num:1, type:"Rock Type", badge:"Boulder Badge", leader:"Brock", color:"#b0895a",
         img:"/images/800px-Boulder_Badge.png",
         chal:"Support the Scene",
-        desc:"You can't rock without a solid foundation. Follow all the local acts, The B-Side &amp; School of Rock Omaha on social.",
-        link:{ href:"#", text:"the follow list ↗" },
+        desc:"You can't rock without a solid foundation. Follow the local acts on Instagram (or Facebook where they've got it): <strong style=\"color:#e7dcc6\">Anxiety, Ugly Lotus, Midusa, Garlick, Horsebait, Waiting for Parry, Settling Houses</strong> — plus <strong style=\"color:#e7dcc6\">The B-Side Bar</strong> &amp; <strong style=\"color:#e7dcc6\">School of Rock Omaha</strong>.",
         where:"Find Brock · merch table",
-        pin:"1234",
-        trivia:{ q:"What nickname does Eric use for his Miata track car?",
-                 options:["Kewl Whip", "Miatanic", "The Cream Puff", "Slowpoke"], answer:0 } },
+        pin:"1234" },
 
       { id:"water", num:2, type:"Water Type", badge:"Cascade Badge", leader:"Misty", color:"#3f7ca0",
         img:"/images/800px-Cascade_Badge.png",
@@ -291,8 +305,8 @@
         desc:"When iPod Shuffle plays \"Where Is My Mind,\" raise your phone flashlight and light up the room. Get caught glowing.",
         where:"Find Lt. Surge · stage-side",
         pin:"1234",
-        trivia:{ q:"PLACEHOLDER — add an Eric-lore question here",
-                 options:["The correct answer", "A wrong one", "Another wrong one", "One more wrong one"], answer:0 } },
+        trivia:{ q:"Eric ran gameday announcements &amp; promotions for three Omaha teams. Which one did he NOT?",
+                 options:["Omaha Beef", "Omaha Storm Chasers", "Omaha Nighthawks", "Omaha Mammoths"], answer:1 } },
 
       { id:"grass", num:5, type:"Grass Type", badge:"Rainbow Badge", leader:"Erika", color:"#6bbf59",
         img:"/images/800px-Rainbow_Badge.png",
@@ -301,8 +315,8 @@
         link:{ href:"#", text:"donate ↗" },
         where:"Find Erika · Future Rockers table",
         pin:"1234",
-        trivia:{ q:"PLACEHOLDER — add an Eric-lore question here",
-                 options:["The correct answer", "A wrong one", "Another wrong one", "One more wrong one"], answer:0 } },
+        trivia:{ q:"What was Eric's primary job in the Air Force?",
+                 options:["Aircraft mechanic", "Weather forecaster", "Air traffic controller", "Intelligence analyst"], answer:1 } },
 
       { id:"psychic", num:6, type:"Psychic Type", badge:"Marsh Badge", leader:"Sabrina", color:"#d86a9c",
         img:"/images/800px-Marsh_Badge.png",
@@ -310,8 +324,8 @@
         desc:"Sabrina sees what's ahead. Write down a dream — for this year or the next 40 — and pin it to the Board of Dreams. Read one someone else left.",
         where:"Find Sabrina · Board of Dreams",
         pin:"1234",
-        trivia:{ q:"PLACEHOLDER — add an Eric-lore question here",
-                 options:["The correct answer", "A wrong one", "Another wrong one", "One more wrong one"], answer:0 } },
+        trivia:{ q:"What instrument did Eric play in middle school band?",
+                 options:["Trombone", "Saxophone", "Trumpet", "Drums"], answer:2 } },
 
       { id:"fire", num:7, type:"Fire Type", badge:"Volcano Badge", leader:"Blaine", color:"#d8452f",
         img:"/images/800px-Volcano_Badge.png",
@@ -319,8 +333,8 @@
         desc:"Feel the burn — put in a song request or hop on stage during the open jam. Amateurs welcome; that's the whole point.",
         where:"Find Blaine · the open-jam host",
         pin:"1234",
-        trivia:{ q:"PLACEHOLDER — add an Eric-lore question here",
-                 options:["The correct answer", "A wrong one", "Another wrong one", "One more wrong one"], answer:0 } },
+        trivia:{ q:"What hurricane did Eric ride out while in Air Force tech school?",
+                 options:["Rita", "Katrina", "Ike", "Andrew"], answer:1 } },
 
       { id:"ground", num:8, type:"Ground Type · Final Gym", badge:"Earth Badge", leader:"Giovanni", color:"#e8823a",
         img:"/images/800px-Earth_Badge.png",
@@ -328,8 +342,8 @@
         desc:"Nothing moves the earth like a packed floor — round up a crew and get a group photo on the dance floor with the birthday boy.",
         where:"Find Giovanni · the Champion himself",
         pin:"1234",
-        trivia:{ q:"PLACEHOLDER — add an Eric-lore question here",
-                 options:["The correct answer", "A wrong one", "Another wrong one", "One more wrong one"], answer:0 } }
+        trivia:{ q:"What nickname does Eric use for his Miata track car?",
+                 options:["Kewl Whip", "Miatanic", "The Cream Puff", "Slowpoke"], answer:0 } }
     ];
     /* ============================================================ */
 
@@ -355,6 +369,31 @@
     var statusEl = document.getElementById('status');
     var celebrateEl = document.getElementById('celebrate');
     var caseEl = document.getElementById('case');
+    var trackEl = document.getElementById('track');
+    var tickLabelsEl = document.getElementById('ticklabels');
+
+    // Booster-pack thresholds — vertical marks on the progress bar.
+    var THRESHOLDS = [
+      { n: 3, label: "1st pack" },
+      { n: 6, label: "2nd pack" }
+    ];
+    function buildTicks() {
+      var total = GYMS.length;
+      if (!total) return;
+      THRESHOLDS.forEach(function (t) {
+        if (t.n >= total) return; // full bar already marks the last tier
+        var pct = (t.n / total) * 100;
+        var tick = document.createElement('div');
+        tick.className = 'tick';
+        tick.style.left = pct + '%';
+        trackEl.appendChild(tick);
+        var lab = document.createElement('span');
+        lab.className = 'tick-label';
+        lab.style.left = pct + '%';
+        lab.textContent = t.n + ' · ' + t.label;
+        tickLabelsEl.appendChild(lab);
+      });
+    }
 
     function statusFor(n, total) {
       if (n >= total) return "👑 All 8 — premium pack unlocked!";
@@ -368,7 +407,7 @@
 
     function buildGym(g) {
       var st = get(g.id);
-      var unlocked = !!st.u, earned = !!st.e;
+      var unlocked = !!st.u || !g.trivia, earned = !!st.e;
       var row = document.createElement('div');
       row.className = 'gym' + (earned ? ' earned' : (unlocked ? '' : ' locked'));
 
@@ -507,6 +546,7 @@
       }
     });
 
+    buildTicks();
     render();
   </script>
 </body>
